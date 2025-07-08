@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Package Manager AI - Intelligent Project Setup</title>
+    <meta name="description" content="Transform your development workflow with AI-powered project setup. Zero configuration, instant results, production-ready templates.">
+    <meta name="keywords" content="package manager, project setup, developer tools, AI, automation, templates">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://github.com/cooltimez821/package-manager-ai">
+    <meta property="og:title" content="Package Manager AI - Intelligent Project Setup">
+    <meta property="og:description" content="Transform your development workflow with AI-powered project setup">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://github.com/cooltimez821/package-manager-ai">
+    <meta property="twitter:title" content="Package Manager AI - Intelligent Project Setup">
+    <meta property="twitter:description" content="Transform your development workflow with AI-powered project setup">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: all 0.3s ease;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 4rem 0;
+            text-align: center;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+        }
+        
+        /* Installation */
+        .installation {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            position: relative;
+        }
+        
+        .installation h3 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .install-command {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            overflow-x: auto;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        /* Tools Grid */
+        .tools-section {
+            padding: 4rem 0;
+        }
+        
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .tool-card {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-color: var(--accent-color);
+        }
+        
+        .tool-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .tool-card h3 {
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+        
+        .tool-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .tool-features {
+            list-style: none;
+            margin-top: 1rem;
+        }
+        
+        .tool-features li {
+            padding: 0.25rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .tool-features li:before {
+            content: "✓ ";
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        /* Statistics */
+        .stats-section {
+            background: var(--bg-secondary);
+            padding: 4rem 0;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+        
+        .stat-item h3 {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-item p {
+            color: var(--text-secondary);
+        }
+        
+        /* Features */
+        .features-section {
+            padding: 4rem 0;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .feature-item {
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 2rem 0;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent-color);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border-color);
+            border-radius: 50%;
+            border-top-color: var(--accent-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <a href="#" class="logo">📦 Package Manager AI</a>
+            <ul class="nav-links">
+                <li><a href="#tools">Tools</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#stats">Stats</a></li>
+                <li><a href="https://github.com/cooltimez821/package-manager-ai">GitHub</a></li>
+            </ul>
+            <button class="theme-toggle" onclick="packageManagerUtils.toggleTheme()">🌓</button>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Intelligent Project Setup</h1>
+                <p>Transform your development workflow with AI-powered project setup. Zero configuration headaches, instant results, production-ready templates.</p>
+                
+                <div class="installation">
+                    <h3>Quick Start</h3>
+                    <div class="install-command">
+                        <button class="copy-btn" onclick="packageManagerUtils.copyToClipboard('npm install -g package-manager-ai')">Copy</button>
+                        $ npm install -g package-manager-ai
+                    </div>
+                </div>
+                
+                <div class="cta-buttons">
+                    <a href="interactive-playground.html" class="btn btn-primary">🚀 Try Interactive Demo</a>
+                    <a href="project-health-scanner.html" class="btn btn-secondary">🩺 Scan Your Project</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="tools" class="tools-section">
+            <div class="container">
+                <h2 style="text-align: center; margin-bottom: 2rem;">Complete Developer Ecosystem</h2>
+                <div class="tools-grid">
+                    <div class="tool-card" onclick="window.location.href='interactive-playground.html'">
+                        <div class="tool-icon">🚀</div>
+                        <h3>Interactive Playground</h3>
+                        <p>Experience the full CLI in your browser with real terminal simulation and live project creation.</p>
+                        <ul class="tool-features">
+                            <li>8 project templates (React, Next.js, Vue, etc.)</li>
+                            <li>Real-time file system visualization</li>
+                            <li>Command history and autocomplete</li>
+                            <li>Mobile-optimized terminal experience</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tool-card" onclick="window.location.href='project-health-scanner.html'">
+                        <div class="tool-icon">🩺</div>
+                        <h3>Project Health Scanner</h3>
+                        <p>Comprehensive analysis of your existing projects with actionable recommendations.</p>
+                        <ul class="tool-features">
+                            <li>Dependency security scanning</li>
+                            <li>Performance optimization suggestions</li>
+                            <li>Configuration best practices</li>
+                            <li>Health scoring (0-100)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tool-card" onclick="window.location.href='pkgsetup-preview.html'">
+                        <div class="tool-icon">📚</div>
+                        <h3>Documentation Hub</h3>
+                        <p>Complete command reference with interactive examples and template showcase.</p>
+                        <ul class="tool-features">
+                            <li>Copy-paste command examples</li>
+                            <li>Visual template gallery</li>
+                            <li>Technology stack breakdowns</li>
+                            <li>Best practices guide</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tool-card" onclick="window.location.href='test-suite.html'">
+                        <div class="tool-icon">🧪</div>
+                        <h3>Test Suite</h3>
+                        <p>Comprehensive testing dashboard with performance monitoring and quality assurance.</p>
+                        <ul class="tool-features">
+                            <li>24 automated tests</li>
+                            <li>Performance benchmarking</li>
+                            <li>Mobile compatibility testing</li>
+                            <li>Real-time results dashboard</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="stats" class="stats-section">
+            <div class="container">
+                <h2 style="text-align: center; margin-bottom: 2rem;">Impact & Results</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <h3>90%</h3>
+                        <p>Faster Setup Time</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>8</h3>
+                        <p>Ready Templates</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>0</h3>
+                        <p>Configuration Headaches</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>24</h3>
+                        <p>Quality Tests</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="features-section">
+            <div class="container">
+                <h2 style="text-align: center; margin-bottom: 2rem;">Why Choose Package Manager AI?</h2>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Zero Configuration</h3>
+                        <p>Intelligent defaults and automatic conflict resolution eliminate setup headaches.</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Production Ready</h3>
+                        <p>All templates include best practices, security measures, and performance optimizations.</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📱</div>
+                        <h3>Mobile First</h3>
+                        <p>Every tool works perfectly on mobile devices with touch-optimized interfaces.</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🔒</div>
+                        <h3>Privacy Focused</h3>
+                        <p>All processing happens client-side. Your code never leaves your browser.</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🚀</div>
+                        <h3>Instant Results</h3>
+                        <p>Projects are ready to run in seconds, not hours of configuration.</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🎨</div>
+                        <h3>Modern Stack</h3>
+                        <p>Latest versions of frameworks with modern tooling and best practices.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="https://github.com/cooltimez821/package-manager-ai">GitHub</a>
+                <a href="https://github.com/cooltimez821/package-manager-ai/issues">Report Issues</a>
+                <a href="https://github.com/cooltimez821/package-manager-ai/blob/main/README.md">Documentation</a>
+                <a href="#" onclick="showFeedbackForm()">Feedback</a>
+            </div>
+            <p>&copy; 2024 Package Manager AI. Built with ❤️ for developers who value their time.</p>
+        </div>
+    </footer>
+
+    <script src="shared-utils.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Track page view
+            packageManagerUtils.trackEvent('landing_page_view');
+            
+            // Add smooth scrolling
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+            
+            // Track tool card clicks
+            document.querySelectorAll('.tool-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const toolName = this.querySelector('h3').textContent;
+                    packageManagerUtils.trackEvent('tool_card_click', { tool: toolName });
+                });
+            });
+            
+            // Track CTA button clicks
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const buttonText = this.textContent;
+                    packageManagerUtils.trackEvent('cta_click', { button: buttonText });
+                });
+            });
+        });
+        
+        // Feedback form
+        function showFeedbackForm() {
+            const feedback = prompt('We\'d love to hear your feedback! What would make Package Manager AI even better?');
+            if (feedback && feedback.trim()) {
+                packageManagerUtils.trackEvent('feedback_submitted', { feedback: feedback.substring(0, 100) });
+                packageManagerUtils.showNotification('Thank you for your feedback!', 'success');
+                
+                // In a real implementation, you'd send this to a backend
+                console.log('Feedback received:', feedback);
+            }
+        }
+        
+        // Add some interactive animations
+        function addScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.tool-card, .feature-item, .stat-item').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
+        }
+        
+        // Initialize animations after page load
+        window.addEventListener('load', addScrollAnimations);
+    </script>
+</body>
+</html>

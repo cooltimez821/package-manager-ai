@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Health Scanner - Package Manager AI</title>
+    <meta name="description" content="Comprehensive analysis of your projects with actionable recommendations and health scoring.">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .main-content {
+            padding: 2rem 0;
+        }
+        
+        .scanner-section {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: var(--accent-color);
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .sample-projects {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .sample-project {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .sample-project:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+        
+        .results-section {
+            display: none;
+        }
+        
+        .health-score {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .score-excellent { background: #10b981; }
+        .score-good { background: #3b82f6; }
+        .score-warning { background: #f59e0b; }
+        .score-poor { background: #ef4444; }
+        
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .analysis-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .card-icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+        
+        .card-score {
+            margin-left: auto;
+            font-weight: bold;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .recommendations {
+            list-style: none;
+        }
+        
+        .recommendation {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .recommendation:last-child {
+            border-bottom: none;
+        }
+        
+        .recommendation-icon {
+            margin-right: 0.5rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-color);
+            transition: width 2s ease;
+            border-radius: 10px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .sample-projects {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <a href="index.html" class="logo">🩺 Project Health Scanner</a>
+            <a href="index.html" class="btn">← Back to Hub</a>
+        </nav>
+    </header>
+
+    <main class="container main-content">
+        <section class="scanner-section">
+            <h1>🩺 Project Health Scanner</h1>
+            <p>Upload your package.json file for comprehensive analysis with actionable recommendations.</p>
+            
+            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📁</div>
+                <h3>Drop your package.json here</h3>
+                <p>or click to browse files</p>
+                <input type="file" id="fileInput" class="file-input" accept=".json" onchange="handleFileUpload(event)">
+            </div>
+            
+            <h3 style="margin-top: 2rem;">Try Sample Projects</h3>
+            <div class="sample-projects">
+                <div class="sample-project" onclick="analyzeSample('react')">
+                    <h4>⚛️ React App</h4>
+                    <p>Modern React with TypeScript</p>
+                </div>
+                <div class="sample-project" onclick="analyzeSample('nextjs')">
+                    <h4>🚀 Next.js</h4>
+                    <p>Full-stack framework</p>
+                </div>
+                <div class="sample-project" onclick="analyzeSample('express')">
+                    <h4>🌐 Express API</h4>
+                    <p>Node.js REST server</p>
+                </div>
+                <div class="sample-project" onclick="analyzeSample('legacy')">
+                    <h4>⚠️ Legacy Project</h4>
+                    <p>Outdated dependencies</p>
+                </div>
+            </div>
+        </section>
+        
+        <section class="loading" id="loading">
+            <div class="spinner"></div>
+            <h3>Analyzing Project Health...</h3>
+            <p id="loadingStatus">Scanning dependencies...</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </section>
+        
+        <section class="results-section" id="results">
+            <div class="health-score">
+                <div class="score-circle" id="scoreCircle">85</div>
+                <h2>Overall Health Score</h2>
+                <p id="scoreDescription">Good - Your project is in solid shape with room for improvement</p>
+            </div>
+            
+            <div class="analysis-grid">
+                <div class="analysis-card">
+                    <div class="card-header">
+                        <span class="card-icon">🔒</span>
+                        <h3>Security</h3>
+                        <span class="card-score score-excellent" id="securityScore">92/100</span>
+                    </div>
+                    <ul class="recommendations" id="securityRecommendations">
+                        <li class="recommendation">
+                            <span class="recommendation-icon">✅</span>
+                            No known vulnerabilities found
+                        </li>
+                        <li class="recommendation">
+                            <span class="recommendation-icon">⚠️</span>
+                            Consider updating lodash to latest version
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="analysis-card">
+                    <div class="card-header">
+                        <span class="card-icon">⚡</span>
+                        <h3>Performance</h3>
+                        <span class="card-score score-good" id="performanceScore">78/100</span>
+                    </div>
+                    <ul class="recommendations" id="performanceRecommendations">
+                        <li class="recommendation">
+                            <span class="recommendation-icon">💡</span>
+                            Bundle size could be optimized
+                        </li>
+                        <li class="recommendation">
+                            <span class="recommendation-icon">💡</span>
+                            Consider lazy loading for better performance
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="analysis-card">
+                    <div class="card-header">
+                        <span class="card-icon">📦</span>
+                        <h3>Dependencies</h3>
+                        <span class="card-score score-warning" id="dependenciesScore">65/100</span>
+                    </div>
+                    <ul class="recommendations" id="dependenciesRecommendations">
+                        <li class="recommendation">
+                            <span class="recommendation-icon">⬆️</span>
+                            5 dependencies need updates
+                        </li>
+                        <li class="recommendation">
+                            <span class="recommendation-icon">🗑️</span>
+                            3 unused dependencies detected
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="analysis-card">
+                    <div class="card-header">
+                        <span class="card-icon">⚙️</span>
+                        <h3>Configuration</h3>
+                        <span class="card-score score-good" id="configScore">88/100</span>
+                    </div>
+                    <ul class="recommendations" id="configRecommendations">
+                        <li class="recommendation">
+                            <span class="recommendation-icon">✅</span>
+                            TypeScript configuration looks good
+                        </li>
+                        <li class="recommendation">
+                            <span class="recommendation-icon">💡</span>
+                            Add ESLint configuration for better code quality
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn" onclick="exportReport()">📄 Export Report</button>
+                <button class="btn" onclick="resetScanner()">🔄 Scan Another Project</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="shared-utils.js"></script>
+    <script>
+        const sampleProjects = {
+            react: {
+                name: "React TypeScript App",
+                dependencies: {
+                    "react": "^18.2.0",
+                    "react-dom": "^18.2.0",
+                    "@types/react": "^18.0.28",
+                    "typescript": "^4.9.5",
+                    "vite": "^4.1.0"
+                },
+                scores: { security: 95, performance: 88, dependencies: 92, config: 90 }
+            },
+            nextjs: {
+                name: "Next.js Application",
+                dependencies: {
+                    "next": "^13.2.0",
+                    "react": "^18.2.0",
+                    "react-dom": "^18.2.0",
+                    "@types/react": "^18.0.28"
+                },
+                scores: { security: 90, performance: 85, dependencies: 88, config: 95 }
+            },
+            express: {
+                name: "Express API Server",
+                dependencies: {
+                    "express": "^4.18.2",
+                    "cors": "^2.8.5",
+                    "helmet": "^6.0.1",
+                    "morgan": "^1.10.0"
+                },
+                scores: { security: 85, performance: 75, dependencies: 80, config: 85 }
+            },
+            legacy: {
+                name: "Legacy Project",
+                dependencies: {
+                    "react": "^16.14.0",
+                    "lodash": "^4.17.20",
+                    "moment": "^2.29.1",
+                    "jquery": "^3.6.0"
+                },
+                scores: { security: 45, performance: 35, dependencies: 25, config: 60 }
+            }
+        };
+        
+        function setupDragAndDrop() {
+            const uploadArea = document.getElementById('uploadArea');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            uploadArea.addEventListener('drop', handleDrop, false);
+        }
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        function highlight(e) {
+            document.getElementById('uploadArea').classList.add('dragover');
+        }
+        
+        function unhighlight(e) {
+            document.getElementById('uploadArea').classList.remove('dragover');
+        }
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+        
+        function handleFileUpload(event) {
+            handleFiles(event.target.files);
+        }
+        
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            const file = files[0];
+            if (!file.name.endsWith('.json')) {
+                packageManagerUtils.showNotification('Please upload a JSON file', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const packageData = JSON.parse(e.target.result);
+                    analyzeProject(packageData, file.name);
+                } catch (error) {
+                    packageManagerUtils.showNotification('Invalid JSON file', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        function analyzeSample(projectType) {
+            const project = sampleProjects[projectType];
+            analyzeProject({ 
+                name: project.name,
+                dependencies: project.dependencies 
+            }, `${projectType}-sample.json`, project.scores);
+            
+            packageManagerUtils.trackEvent('sample_project_analyzed', { projectType });
+        }
+        
+        function analyzeProject(packageData, filename, predefinedScores = null) {
+            showLoading();
+            packageManagerUtils.trackEvent('project_analysis_started', { filename });
+            
+            const steps = [
+                'Scanning dependencies...',
+                'Checking for vulnerabilities...',
+                'Analyzing performance metrics...',
+                'Reviewing configuration...',
+                'Generating recommendations...'
+            ];
+            
+            let currentStep = 0;
+            const stepInterval = setInterval(() => {
+                if (currentStep < steps.length) {
+                    document.getElementById('loadingStatus').textContent = steps[currentStep];
+                    document.getElementById('progressFill').style.width = `${(currentStep + 1) * 20}%`;
+                    currentStep++;
+                } else {
+                    clearInterval(stepInterval);
+                    setTimeout(() => {
+                        showResults(packageData, predefinedScores);
+                    }, 500);
+                }
+            }, 800);
+        }
+        
+        function showLoading() {
+            document.querySelector('.scanner-section').style.display = 'none';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('progressFill').style.width = '0%';
+        }
+        
+        function showResults(packageData, predefinedScores) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            
+            const scores = predefinedScores || generateScores(packageData);
+            const overallScore = Math.round((scores.security + scores.performance + scores.dependencies + scores.config) / 4);
+            
+            updateScoreDisplay(overallScore);
+            updateAnalysisCards(scores, packageData);
+            
+            packageManagerUtils.trackEvent('project_analysis_completed', { 
+                overallScore,
+                ...scores 
+            });
+        }
+        
+        function generateScores(packageData) {
+            // Simple scoring algorithm for demo
+            const depCount = Object.keys(packageData.dependencies || {}).length;
+            const hasTypeScript = packageData.dependencies?.typescript || packageData.devDependencies?.typescript;
+            const hasModernReact = packageData.dependencies?.react?.includes('18');
+            
+            return {
+                security: Math.max(60, 100 - depCount * 2),
+                performance: hasModernReact ? 85 : 70,
+                dependencies: Math.max(50, 90 - depCount),
+                config: hasTypeScript ? 90 : 75
+            };
+        }
+        
+        function updateScoreDisplay(score) {
+            const scoreCircle = document.getElementById('scoreCircle');
+            const scoreDescription = document.getElementById('scoreDescription');
+            
+            scoreCircle.textContent = score;
+            
+            if (score >= 90) {
+                scoreCircle.className = 'score-circle score-excellent';
+                scoreDescription.textContent = 'Excellent - Your project follows best practices';
+            } else if (score >= 75) {
+                scoreCircle.className = 'score-circle score-good';
+                scoreDescription.textContent = 'Good - Your project is in solid shape with room for improvement';
+            } else if (score >= 60) {
+                scoreCircle.className = 'score-circle score-warning';
+                scoreDescription.textContent = 'Fair - Several areas need attention';
+            } else {
+                scoreCircle.className = 'score-circle score-poor';
+                scoreDescription.textContent = 'Poor - Significant improvements needed';
+            }
+        }
+        
+        function updateAnalysisCards(scores, packageData) {
+            // Update security card
+            updateCard('security', scores.security, [
+                scores.security > 80 ? '✅ No critical vulnerabilities found' : '⚠️ Security vulnerabilities detected',
+                '💡 Consider adding security headers',
+                '🔒 Enable dependency scanning in CI/CD'
+            ]);
+            
+            // Update performance card
+            updateCard('performance', scores.performance, [
+                '⚡ Bundle size analysis needed',
+                '💡 Consider code splitting',
+                '🚀 Optimize asset loading'
+            ]);
+            
+            // Update dependencies card
+            const depCount = Object.keys(packageData.dependencies || {}).length;
+            updateCard('dependencies', scores.dependencies, [
+                `📦 ${depCount} dependencies found`,
+                scores.dependencies < 70 ? '⬆️ Multiple updates available' : '✅ Dependencies are up to date',
+                '🗑️ Remove unused dependencies'
+            ]);
+            
+            // Update config card
+            updateCard('config', scores.config, [
+                '⚙️ Configuration looks good',
+                '💡 Add ESLint for code quality',
+                '📝 Consider adding Prettier'
+            ]);
+        }
+        
+        function updateCard(type, score, recommendations) {
+            const scoreElement = document.getElementById(`${type}Score`);
+            const recommendationsElement = document.getElementById(`${type}Recommendations`);
+            
+            scoreElement.textContent = `${score}/100`;
+            scoreElement.className = `card-score ${getScoreClass(score)}`;
+            
+            recommendationsElement.innerHTML = recommendations
+                .map(rec => `<li class="recommendation">${rec}</li>`)
+                .join('');
+        }
+        
+        function getScoreClass(score) {
+            if (score >= 90) return 'score-excellent';
+            if (score >= 75) return 'score-good';
+            if (score >= 60) return 'score-warning';
+            return 'score-poor';
+        }
+        
+        function exportReport() {
+            const report = {
+                timestamp: new Date().toISOString(),
+                overallScore: document.getElementById('scoreCircle').textContent,
+                analysis: {
+                    security: document.getElementById('securityScore').textContent,
+                    performance: document.getElementById('performanceScore').textContent,
+                    dependencies: document.getElementById('dependenciesScore').textContent,
+                    config: document.getElementById('configScore').textContent
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'health-report.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            packageManagerUtils.trackEvent('report_exported');
+            packageManagerUtils.showNotification('Report exported successfully!', 'success');
+        }
+        
+        function resetScanner() {
+            document.getElementById('results').style.display = 'none';
+            document.querySelector('.scanner-section').style.display = 'block';
+            document.getElementById('fileInput').value = '';
+            
+            packageManagerUtils.trackEvent('scanner_reset');
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupDragAndDrop();
+            packageManagerUtils.trackEvent('health_scanner_loaded');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Playground - Package Manager AI</title>
+    <meta name="description" content="Try Package Manager AI in your browser with real terminal simulation and live project creation.">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .playground-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            grid-template-rows: 60px 1fr;
+            height: 100vh;
+            gap: 1px;
+            background: var(--border-color);
+        }
+        
+        /* Header */
+        .header {
+            grid-column: 1 / -1;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .logo {
+            font-weight: bold;
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .sidebar h3 {
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+            font-size: 1rem;
+        }
+        
+        .template-list {
+            list-style: none;
+        }
+        
+        .template-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .template-item:hover {
+            border-color: var(--accent-color);
+            background: var(--bg-secondary);
+        }
+        
+        .template-item.active {
+            border-color: var(--accent-color);
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .template-name {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .template-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .template-item.active .template-desc {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Terminal */
+        .terminal-container {
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .terminal-header {
+            background: #2d2d2d;
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid #404040;
+        }
+        
+        .terminal-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+        
+        .terminal-title {
+            color: #ffffff;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+        }
+        
+        .terminal {
+            flex: 1;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            overflow-y: auto;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+        
+        .terminal-line {
+            margin-bottom: 0.5rem;
+            word-wrap: break-word;
+        }
+        
+        .prompt {
+            color: #00ff00;
+        }
+        
+        .command {
+            color: #ffffff;
+        }
+        
+        .output {
+            color: #cccccc;
+            margin-left: 0;
+        }
+        
+        .error {
+            color: #ff6b6b;
+        }
+        
+        .success {
+            color: #51cf66;
+        }
+        
+        .warning {
+            color: #ffd43b;
+        }
+        
+        .terminal-input {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: #1a1a1a;
+            border-top: 1px solid #404040;
+        }
+        
+        .terminal-prompt {
+            color: #00ff00;
+            margin-right: 0.5rem;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .terminal-input input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        /* File Explorer */
+        .file-explorer {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .file-tree {
+            list-style: none;
+        }
+        
+        .file-item {
+            padding: 0.25rem 0;
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .file-item:hover {
+            color: var(--accent-color);
+        }
+        
+        .file-item.folder {
+            font-weight: bold;
+        }
+        
+        .file-item.new {
+            color: #51cf66;
+            animation: highlight 2s ease-out;
+        }
+        
+        @keyframes highlight {
+            0% { background: rgba(81, 207, 102, 0.3); }
+            100% { background: transparent; }
+        }
+        
+        .indent-1 { margin-left: 1rem; }
+        .indent-2 { margin-left: 2rem; }
+        .indent-3 { margin-left: 3rem; }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .playground-container {
+                grid-template-columns: 250px 1fr;
+            }
+            
+            .file-explorer {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .playground-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 60px 200px 1fr;
+            }
+            
+            .sidebar {
+                grid-row: 2;
+                padding: 0.5rem;
+            }
+            
+            .terminal-container {
+                grid-row: 3;
+            }
+            
+            .template-list {
+                display: flex;
+                gap: 0.5rem;
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+            }
+            
+            .template-item {
+                min-width: 150px;
+                margin-bottom: 0;
+            }
+        }
+        
+        /* Loading states */
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #404040;
+            border-radius: 50%;
+            border-top-color: #00ff00;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Command suggestions */
+        .suggestions {
+            position: absolute;
+            bottom: 60px;
+            left: 1rem;
+            right: 1rem;
+            background: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+        
+        .suggestion-item {
+            padding: 0.5rem 1rem;
+            color: #cccccc;
+            cursor: pointer;
+            border-bottom: 1px solid #404040;
+        }
+        
+        .suggestion-item:hover,
+        .suggestion-item.selected {
+            background: #404040;
+            color: #ffffff;
+        }
+        
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+        
+        .suggestion-command {
+            font-family: 'Courier New', monospace;
+            color: #00ff00;
+        }
+        
+        .suggestion-desc {
+            font-size: 0.8rem;
+            color: #999999;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="playground-container">
+        <header class="header">
+            <a href="index.html" class="logo">📦 Package Manager AI</a>
+            <div class="header-controls">
+                <button class="btn" onclick="clearTerminal()">Clear</button>
+                <button class="btn" onclick="resetPlayground()">Reset</button>
+                <button class="btn btn-primary" onclick="showHelp()">Help</button>
+                <a href="index.html" class="btn">← Back</a>
+            </div>
+        </header>
+        
+        <aside class="sidebar">
+            <h3>🚀 Quick Start Templates</h3>
+            <ul class="template-list" id="templateList">
+                <li class="template-item" data-template="react" onclick="selectTemplate('react')">
+                    <div class="template-name">React App</div>
+                    <div class="template-desc">Modern React with TypeScript</div>
+                </li>
+                <li class="template-item" data-template="nextjs" onclick="selectTemplate('nextjs')">
+                    <div class="template-name">Next.js</div>
+                    <div class="template-desc">Full-stack React framework</div>
+                </li>
+                <li class="template-item" data-template="vue" onclick="selectTemplate('vue')">
+                    <div class="template-name">Vue.js</div>
+                    <div class="template-desc">Progressive JavaScript framework</div>
+                </li>
+                <li class="template-item" data-template="express" onclick="selectTemplate('express')">
+                    <div class="template-name">Express API</div>
+                    <div class="template-desc">Node.js REST API server</div>
+                </li>
+                <li class="template-item" data-template="svelte" onclick="selectTemplate('svelte')">
+                    <div class="template-name">Svelte</div>
+                    <div class="template-desc">Compile-time optimized framework</div>
+                </li>
+                <li class="template-item" data-template="python" onclick="selectTemplate('python')">
+                    <div class="template-name">Python Flask</div>
+                    <div class="template-desc">Lightweight Python web framework</div>
+                </li>
+                <li class="template-item" data-template="rust" onclick="selectTemplate('rust')">
+                    <div class="template-name">Rust Actix</div>
+                    <div class="template-desc">High-performance web server</div>
+                </li>
+                <li class="template-item" data-template="deno" onclick="selectTemplate('deno')">
+                    <div class="template-name">Deno Fresh</div>
+                    <div class="template-desc">Modern TypeScript runtime</div>
+                </li>
+            </ul>
+        </aside>
+        
+        <main class="terminal-container">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">Package Manager AI Terminal</div>
+            </div>
+            
+            <div class="terminal" id="terminal">
+                <div class="terminal-line">
+                    <span class="success">Welcome to Package Manager AI Interactive Playground! 🚀</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">Try commands like: <span class="command">pkgsetup create my-app --template react</span></span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">Type <span class="command">help</span> for available commands or select a template from the sidebar.</span>
+                </div>
+                <div class="terminal-line"></div>
+            </div>
+            
+            <div class="suggestions" id="suggestions"></div>
+            
+            <div class="terminal-input">
+                <span class="terminal-prompt">$</span>
+                <input type="text" id="commandInput" placeholder="Type a command..." autocomplete="off">
+            </div>
+        </main>
+        
+        <aside class="file-explorer">
+            <h3>📁 Project Files</h3>
+            <ul class="file-tree" id="fileTree">
+                <li class="file-item">No project created yet</li>
+                <li class="file-item output">Select a template and run a create command to see files appear here!</li>
+            </ul>
+        </aside>
+    </div>
+
+    <script src="shared-utils.js"></script>
+    <script>
+        class InteractivePlayground {
+            constructor() {
+                this.terminal = document.getElementById('terminal');
+                this.commandInput = document.getElementById('commandInput');
+                this.fileTree = document.getElementById('fileTree');
+                this.suggestions = document.getElementById('suggestions');
+                
+                this.commandHistory = [];
+                this.historyIndex = -1;
+                this.currentProject = null;
+                this.selectedTemplate = null;
+                this.suggestionIndex = -1;
+                
+                this.commands = {
+                    'help': this.showHelp.bind(this),
+                    'clear': this.clearTerminal.bind(this),
+                    'ls': this.listFiles.bind(this),
+                    'pwd': this.showCurrentDir.bind(this),
+                    'pkgsetup': this.handlePkgSetup.bind(this),
+                    'npm': this.handleNpm.bind(this),
+                    'yarn': this.handleYarn.bind(this),
+                    'cd': this.changeDirectory.bind(this)
+                };
+                
+                this.templates = {
+                    react: {
+                        name: 'React App',
+                        files: [
+                            'package.json',
+                            'src/App.tsx',
+                            'src/index.tsx',
+                            'src/components/Header.tsx',
+                            'public/index.html',
+                            'tsconfig.json',
+                            'README.md'
+                        ],
+                        dependencies: ['react', 'react-dom', '@types/react', 'typescript', 'vite']
+                    },
+                    nextjs: {
+                        name: 'Next.js App',
+                        files: [
+                            'package.json',
+                            'pages/index.tsx',
+                            'pages/api/hello.ts',
+                            'components/Layout.tsx',
+                            'styles/globals.css',
+                            'next.config.js',
+                            'tsconfig.json',
+                            'README.md'
+                        ],
+                        dependencies: ['next', 'react', 'react-dom', '@types/react', 'typescript']
+                    },
+                    vue: {
+                        name: 'Vue.js App',
+                        files: [
+                            'package.json',
+                            'src/App.vue',
+                            'src/main.ts',
+                            'src/components/HelloWorld.vue',
+                            'index.html',
+                            'vite.config.ts',
+                            'tsconfig.json',
+                            'README.md'
+                        ],
+                        dependencies: ['vue', '@vitejs/plugin-vue', 'typescript', 'vite']
+                    },
+                    express: {
+                        name: 'Express API',
+                        files: [
+                            'package.json',
+                            'src/server.ts',
+                            'src/routes/api.ts',
+                            'src/middleware/auth.ts',
+                            'src/models/User.ts',
+                            '.env.example',
+                            'tsconfig.json',
+                            'README.md'
+                        ],
+                        dependencies: ['express', '@types/express', 'typescript', 'ts-node', 'nodemon']
+                    },
+                    svelte: {
+                        name: 'Svelte App',
+                        files: [
+                            'package.json',
+                            'src/App.svelte',
+                            'src/main.ts',
+                            'src/lib/Counter.svelte',
+                            'index.html',
+                            'vite.config.js',
+                            'tsconfig.json',
+                            'README.md'
+                        ],
+                        dependencies: ['svelte', '@sveltejs/vite-plugin-svelte', 'typescript', 'vite']
+                    },
+                    python: {
+                        name: 'Python Flask',
+                        files: [
+                            'requirements.txt',
+                            'app.py',
+                            'routes/api.py',
+                            'models/user.py',
+                            'templates/index.html',
+                            'static/style.css',
+                            'config.py',
+                            'README.md'
+                        ],
+                        dependencies: ['flask', 'flask-sqlalchemy', 'python-dotenv']
+                    },
+                    rust: {
+                        name: 'Rust Actix',
+                        files: [
+                            'Cargo.toml',
+                            'src/main.rs',
+                            'src/handlers/mod.rs',
+                            'src/models/user.rs',
+                            'src/config.rs',
+                            '.env.example',
+                            'README.md'
+                        ],
+                        dependencies: ['actix-web', 'tokio', 'serde', 'sqlx']
+                    },
+                    deno: {
+                        name: 'Deno Fresh',
+                        files: [
+                            'deno.json',
+                            'main.ts',
+                            'routes/index.tsx',
+                            'routes/api/users.ts',
+                            'islands/Counter.tsx',
+                            'static/style.css',
+                            'README.md'
+                        ],
+                        dependencies: ['fresh', 'preact']
+                    }
+                };
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupEventListeners();
+                this.addToTerminal('Ready! Type a command or select a template to get started.', 'success');
+                packageManagerUtils.trackEvent('playground_loaded');
+            }
+            
+            setupEventListeners() {
+                this.commandInput.addEventListener('keydown', this.handleKeyDown.bind(this));
+                this.commandInput.addEventListener('input', this.handleInput.bind(this));
+                this.commandInput.focus();
+                
+                // Keep focus on input
+                document.addEventListener('click', () => {
+                    this.commandInput.focus();
+                });
+            }
+            
+            handleKeyDown(e) {
+                switch(e.key) {
+                    case 'Enter':
+                        this.executeCommand();
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        this.navigateHistory(-1);
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        this.navigateHistory(1);
+                        break;
+                    case 'Tab':
+                        e.preventDefault();
+                        this.handleTabCompletion();
+                        break;
+                    case 'Escape':
+                        this.hideSuggestions();
+                        break;
+                }
+            }
+            
+            handleInput(e) {
+                const value = e.target.value;
+                if (value.length > 0) {
+                    this.showSuggestions(value);
+                } else {
+                    this.hideSuggestions();
+                }
+            }
+            
+            executeCommand() {
+                const command = this.commandInput.value.trim();
+                if (!command) return;
+                
+                this.addToTerminal(`$ ${command}`, 'prompt');
+                this.commandHistory.unshift(command);
+                this.historyIndex = -1;
+                
+                this.processCommand(command);
+                this.commandInput.value = '';
+                this.hideSuggestions();
+                
+                packageManagerUtils.trackEvent('command_executed', { command: command.split(' ')[0] });
+            }
+            
+            processCommand(command) {
+                const parts = command.split(' ');
+                const cmd = parts[0].toLowerCase();
+                const args = parts.slice(1);
+                
+                if (this.commands[cmd]) {
+                    this.commands[cmd](args);
+                } else {
+                    this.addToTerminal(`Command not found: ${cmd}`, 'error');
+                    this.addToTerminal('Type "help" for available commands.', 'output');
+                }
+            }
+            
+            handlePkgSetup(args) {
+                if (args.length === 0) {
+                    this.addToTerminal('pkgsetup - Package Manager AI CLI', 'success');
+                    this.addToTerminal('Usage: pkgsetup <command> [options]', 'output');
+                    this.addToTerminal('Commands:', 'output');
+                    this.addToTerminal('  create <name> --template <template>  Create new project', 'output');
+                    this.addToTerminal('  analyze [file]                      Analyze project health', 'output');
+                    this.addToTerminal('  templates                           List available templates', 'output');
+                    return;
+                }
+                
+                const subCommand = args[0];
+                
+                switch(subCommand) {
+                    case 'create':
+                        this.handleCreate(args.slice(1));
+                        break;
+                    case 'analyze':
+                        this.handleAnalyze(args.slice(1));
+                        break;
+                    case 'templates':
+                        this.listTemplates();
+                        break;
+                    default:
+                        this.addToTerminal(`Unknown pkgsetup command: ${subCommand}`, 'error');
+                }
+            }
+            
+            handleCreate(args) {
+                if (args.length < 1) {
+                    this.addToTerminal('Usage: pkgsetup create <project-name> --template <template>', 'error');
+                    return;
+                }
+                
+                const projectName = args[0];
+                const templateIndex = args.indexOf('--template');
+                const template = templateIndex !== -1 ? args[templateIndex + 1] : this.selectedTemplate;
+                
+                if (!template) {
+                    this.addToTerminal('Please specify a template with --template or select one from the sidebar', 'error');
+                    this.listTemplates();
+                    return;
+                }
+                
+                if (!this.templates[template]) {
+                    this.addToTerminal(`Template "${template}" not found`, 'error');
+                    this.listTemplates();
+                    return;
+                }
+                
+                this.createProject(projectName, template);
+            }
+            
+            createProject(name, template) {
+                this.addToTerminal(`Creating ${this.templates[template].name} project: ${name}`, 'success');
+                this.addToTerminal('', 'output');
+                
+                // Simulate project creation with loading
+                this.addToTerminal('📦 Initializing project...', 'output');
+                
+                setTimeout(() => {
+                    this.addToTerminal('📁 Creating directory structure...', 'output');
+                    this.currentProject = { name, template, files: [] };
+                    
+                    setTimeout(() => {
+                        this.addToTerminal('📄 Generating files...', 'output');
+                        this.generateProjectFiles(name, template);
+                        
+                        setTimeout(() => {
+                            this.addToTerminal('📦 Installing dependencies...', 'output');
+                            this.simulateInstallation(template);
+                            
+                            setTimeout(() => {
+                                this.addToTerminal('', 'output');
+                                this.addToTerminal('✅ Project created successfully!', 'success');
+                                this.addToTerminal('', 'output');
+                                this.addToTerminal('Next steps:', 'output');
+                                this.addToTerminal(`  cd ${name}`, 'command');
+                                this.addToTerminal('  npm run dev', 'command');
+                                this.addToTerminal('', 'output');
+                                
+                                packageManagerUtils.trackEvent('project_created', { template, name });
+                            }, 1000);
+                        }, 800);
+                    }, 600);
+                }, 400);
+            }
+            
+            generateProjectFiles(projectName, template) {
+                const templateData = this.templates[template];
+                this.fileTree.innerHTML = '';
+                
+                // Add project folder
+                const projectFolder = document.createElement('li');
+                projectFolder.className = 'file-item folder new';
+                projectFolder.textContent = `📁 ${projectName}/`;
+                this.fileTree.appendChild(projectFolder);
+                
+                // Add files with animation delay
+                templateData.files.forEach((file, index) => {
+                    setTimeout(() => {
+                        const fileItem = document.createElement('li');
+                        fileItem.className = 'file-item indent-1 new';
+                        fileItem.textContent = `📄 ${file}`;
+                        this.fileTree.appendChild(fileItem);
+                        
+                        // Remove new class after animation
+                        setTimeout(() => {
+                            fileItem.classList.remove('new');
+                        }, 2000);
+                    }, index * 100);
+                });
+                
+                this.currentProject.files = templateData.files;
+            }
+            
+            simulateInstallation(template) {
+                const deps = this.templates[template].dependencies;
+                deps.forEach((dep, index) => {
+                    setTimeout(() => {
+                        this.addToTerminal(`+ ${dep}`, 'output');
+                    }, index * 200);
+                });
+            }
+            
+            handleAnalyze(args) {
+                if (!this.currentProject) {
+                    this.addToTerminal('No project found. Create a project first.', 'error');
+                    return;
+                }
+                
+                this.addToTerminal('🔍 Analyzing project health...', 'output');
+                
+                setTimeout(() => {
+                    this.addToTerminal('', 'output');
+                    this.addToTerminal('📊 Health Report:', 'success');
+                    this.addToTerminal('  Security Score: 95/100', 'success');
+                    this.addToTerminal('  Performance Score: 88/100', 'warning');
+                    this.addToTerminal('  Best Practices Score: 92/100', 'success');
+                    this.addToTerminal('', 'output');
+                    this.addToTerminal('💡 Recommendations:', 'output');
+                    this.addToTerminal('  • Update 2 dependencies to latest versions', 'output');
+                    this.addToTerminal('  • Add error boundary component', 'output');
+                    this.addToTerminal('  • Enable strict mode in TypeScript', 'output');
+                    this.addToTerminal('', 'output');
+                    this.addToTerminal('Run "pkgsetup analyze --detailed" for full report', 'output');
+                }, 1500);
+            }
+            
+            listTemplates() {
+                this.addToTerminal('Available templates:', 'success');
+                Object.entries(this.templates).forEach(([key, template]) => {
+                    this.addToTerminal(`  ${key.padEnd(10)} - ${template.name}`, 'output');
+                });
+            }
+            
+            handleNpm(args) {
+                if (!this.currentProject) {
+                    this.addToTerminal('No project found. Create a project first.', 'error');
+                    return;
+                }
+                
+                const command = args[0];
+                switch(command) {
+                    case 'install':
+                    case 'i':
+                        this.addToTerminal('📦 Installing dependencies...', 'output');
+                        setTimeout(() => {
+                            this.addToTerminal('✅ Dependencies installed successfully!', 'success');
+                        }, 1000);
+                        break;
+                    case 'run':
+                        const script = args[1] || 'dev';
+                        this.addToTerminal(`🚀 Running script: ${script}`, 'output');
+                        setTimeout(() => {
+                            this.addToTerminal(`✅ ${script} server started on http://localhost:3000`, 'success');
+                        }, 800);
+                        break;
+                    default:
+                        this.addToTerminal(`npm ${args.join(' ')}`, 'output');
+                        this.addToTerminal('✅ Command executed successfully', 'success');
+                }
+            }
+            
+            handleYarn(args) {
+                this.addToTerminal('Using Yarn package manager...', 'output');
+                this.handleNpm(args); // Same behavior as npm for demo
+            }
+            
+            showHelp() {
+                this.addToTerminal('📚 Available Commands:', 'success');
+                this.addToTerminal('', 'output');
+                this.addToTerminal('Package Manager AI:', 'output');
+                this.addToTerminal('  pkgsetup create <name> --template <template>', 'command');
+                this.addToTerminal('  pkgsetup analyze [file]', 'command');
+                this.addToTerminal('  pkgsetup templates', 'command');
+                this.addToTerminal('', 'output');
+                this.addToTerminal('Standard Commands:', 'output');
+                this.addToTerminal('  help          Show this help message', 'command');
+                this.addToTerminal('  clear         Clear terminal', 'command');
+                this.addToTerminal('  ls            List files', 'command');
+                this.addToTerminal('  pwd           Show current directory', 'command');
+                this.addToTerminal('  npm/yarn      Package manager commands', 'command');
+                this.addToTerminal('', 'output');
+                this.addToTerminal('💡 Tips:', 'output');
+                this.addToTerminal('  • Use Tab for autocompletion', 'output');
+                this.addToTerminal('  • Use ↑/↓ arrows for command history', 'output');
+                this.addToTerminal('  • Select templates from the sidebar', 'output');
+            }
+            
+            clearTerminal() {
+                this.terminal.innerHTML = '';
+            }
+            
+            listFiles() {
+                if (!this.currentProject) {
+                    this.addToTerminal('No project found.', 'error');
+                    return;
+                }
+                
+                this.addToTerminal(`Contents of ${this.currentProject.name}/:`, 'output');
+                this.currentProject.files.forEach(file => {
+                    this.addToTerminal(`  ${file}`, 'output');
+                });
+            }
+            
+            showCurrentDir() {
+                const dir = this.currentProject ? `/${this.currentProject.name}` : '/';
+                this.addToTerminal(dir, 'output');
+            }
+            
+            changeDirectory(args) {
+                const dir = args[0] || '';
+                if (dir === '..' || dir === '/') {
+                    this.addToTerminal('/', 'output');
+                } else if (this.currentProject && dir === this.currentProject.name) {
+                    this.addToTerminal(`/${this.currentProject.name}`, 'output');
+                } else {
+                    this.addToTerminal(`Directory not found: ${dir}`, 'error');
+                }
+            }
+            
+            navigateHistory(direction) {
+                if (this.commandHistory.length === 0) return;
+                
+                this.historyIndex += direction;
+                
+                if (this.historyIndex < 0) {
+                    this.historyIndex = -1;
+                    this.commandInput.value = '';
+                } else if (this.historyIndex >= this.commandHistory.length) {
+                    this.historyIndex = this.commandHistory.length - 1;
+                }
+                
+                if (this.historyIndex >= 0) {
+                    this.commandInput.value = this.commandHistory[this.historyIndex];
+                }
+            }
+            
+            showSuggestions(input) {
+                const suggestions = this.getSuggestions(input);
+                if (suggestions.length === 0) {
+                    this.hideSuggestions();
+                    return;
+                }
+                
+                this.suggestions.innerHTML = '';
+                suggestions.forEach((suggestion, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    item.innerHTML = `
+                        <div class="suggestion-command">${suggestion.command}</div>
+                        <div class="suggestion-desc">${suggestion.description}</div>
+                    `;
+                    item.addEventListener('click', () => {
+                        this.commandInput.value = suggestion.command;
+                        this.hideSuggestions();
+                        this.commandInput.focus();
+                    });
+                    this.suggestions.appendChild(item);
+                });
+                
+                this.suggestions.style.display = 'block';
+            }
+            
+            getSuggestions(input) {
+                const suggestions = [
+                    { command: 'pkgsetup create my-app --template react', description: 'Create a new React project' },
+                    { command: 'pkgsetup create api --template express', description: 'Create a new Express API' },
+                    { command: 'pkgsetup templates', description: 'List all available templates' },
+                    { command: 'pkgsetup analyze', description: 'Analyze current project health' },
+                    { command: 'help', description: 'Show available commands' },
+                    { command: 'clear', description: 'Clear the terminal' },
+                    { command: 'ls', description: 'List project files' },
+                    { command: 'npm install', description: 'Install project dependencies' },
+                    { command: 'npm run dev', description: 'Start development server' }
+                ];
+                
+                return suggestions.filter(s => 
+                    s.command.toLowerCase().includes(input.toLowerCase())
+                ).slice(0, 5);
+            }
+            
+            hideSuggestions() {
+                this.suggestions.style.display = 'none';
+                this.suggestionIndex = -1;
+            }
+            
+            handleTabCompletion() {
+                const input = this.commandInput.value;
+                const suggestions = this.getSuggestions(input);
+                
+                if (suggestions.length === 1) {
+                    this.commandInput.value = suggestions[0].command;
+                } else if (suggestions.length > 1) {
+                    this.showSuggestions(input);
+                }
+            }
+            
+            addToTerminal(text, type = 'output') {
+                const line = document.createElement('div');
+                line.className = `terminal-line ${type}`;
+                line.textContent = text;
+                this.terminal.appendChild(line);
+                this.terminal.scrollTop = this.terminal.scrollHeight;
+            }
+        }
+        
+        // Global functions
+        function selectTemplate(template) {
+            // Remove active class from all templates
+            document.querySelectorAll('.template-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to selected template
+            document.querySelector(`[data-template="${template}"]`).classList.add('active');
+            
+            playground.selectedTemplate = template;
+            playground.addToTerminal(`Selected template: ${playground.templates[template].name}`, 'success');
+            playground.addToTerminal(`Try: pkgsetup create my-app --template ${template}`, 'output');
+            
+            packageManagerUtils.trackEvent('template_selected', { template });
+        }
+        
+        function clearTerminal() {
+            playground.clearTerminal();
+        }
+        
+        function resetPlayground() {
+            playground.clearTerminal();
+            playground.currentProject = null;
+            playground.selectedTemplate = null;
+            playground.fileTree.innerHTML = '<li class="file-item">No project created yet</li>';
+            
+            // Remove active template selection
+            document.querySelectorAll('.template-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            playground.addToTerminal('Playground reset! Ready for a new project.', 'success');
+            packageManagerUtils.trackEvent('playground_reset');
+        }
+        
+        function showHelp() {
+            playground.showHelp();
+        }
+        
+        // Initialize playground
+        let playground;
+        document.addEventListener('DOMContentLoaded', () => {
+            playground = new InteractivePlayground();
+        });
+    </script>
+</body>
+</html>
